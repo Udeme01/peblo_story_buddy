@@ -33,9 +33,6 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
       vsync: this,
     );
 
-    // _shakeAnimation = Tween<double>(begin: 0, end: 24).animate(
-    //   CurvedAnimation(parent: _shakeController, curve: Curves.elasticIn),
-    // );
     _shakeAnimation =
         TweenSequence<double>([
           TweenSequenceItem(tween: Tween(begin: 0, end: -16), weight: 1),
@@ -92,7 +89,8 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
 
     return Scaffold(
       extendBodyBehindAppBar: true,
-      backgroundColor: const Color(0xFF6F2BC2),
+      // backgroundColor: const Color(0xFF6F2BC2),
+      backgroundColor: const Color.fromARGB(255, 246, 236, 254),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -230,7 +228,6 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
 
                   const SizedBox(height: 32),
 
-                  // ADD THIS before the button SizedBox:
                   if (errorMessage != null) ...[
                     Container(
                       padding: const EdgeInsets.all(16),
@@ -241,7 +238,7 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
                       ),
                       child: Row(
                         children: [
-                          const Text('😢', style: TextStyle(fontSize: 24)),
+                          const Text('...', style: TextStyle(fontSize: 24)),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
@@ -323,7 +320,10 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF8B5CF6), Color(0xFF6F2BC2)],
+          colors: [
+            Color.fromARGB(255, 253, 251, 255),
+            Color.fromARGB(255, 253, 251, 255),
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
