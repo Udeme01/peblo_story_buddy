@@ -154,19 +154,6 @@ class StoryNotifier extends Notifier<StoryAppState> {
     state = state.copyWith(status: StoryState.idle);
   }
 
-  // void checkAnswer(String selected) async {
-  //   if (state.status == StoryState.success) return;
-
-  //   state = state.copyWith(selectedAnswer: selected);
-
-  //   if (selected == quiz.answer) {
-  //     state = state.copyWith(status: StoryState.success);
-  //   } else {
-  //     state = state.copyWith(status: StoryState.wrong);
-  //     await Future.delayed(const Duration(milliseconds: 600));
-  //     state = state.copyWith(status: StoryState.quiz, selectedAnswer: null);
-  //   }
-  // }
   // In story_provider.dart
   void checkAnswer(String selected) async {
     if (state.status == StoryState.success) return;
