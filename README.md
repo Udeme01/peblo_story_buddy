@@ -160,7 +160,6 @@ I used **Claude (Anthropic)** selectively during this project, primarily as a so
 
 The core architecture, UI design, state machine, and animation decisions were my own. Claude was useful for speeding up research and catching blind spots.
 
-
 **One suggestion I rejected:**
 During development, AI suggested replacing ElevenLabs with `flutter_tts` (native device TTS) as a simpler alternative. I pushed back on this because the quality difference is significant for a children's product — ElevenLabs produces a warmer, more expressive voice that is far more engaging for kids aged 6–10, which is core to Peblo's mission. The brief listed ElevenLabs as a bonus integration, so I felt the extra complexity was worth it for the experience quality. (I kept ElevenLabs and resolved the API issues instead).
 
@@ -169,31 +168,16 @@ My initial approach was to suppress the `402 Payment Required` error silently an
 
 ---
 
-## 📁 Project Structure
+## 📁 Project Structure - can be improved on later!
 
 ```
 lib/
   main.dart                        # App entry point, ProviderScope, theme
-  data/
-    story_data.dart                # Static story content
-  features/
-    quiz/                          # Quiz feature module
-    story/                         # Story feature module
-  models/
-    quiz_model.dart                # QuizQuestion data model with fromJson factory
-    story.dart                     # Story data model
   providers/
     story_provider.dart            # Riverpod Notifier — all app state & business logic
   screens/
-    home_screen.dart               # Home / entry screen
-    quiz_screen.dart               # Quiz screen
-    splash_screen.dart             # Branded loading screen
-    story_screen.dart              # Story view + animations
-  widgets/
-    buddy_character.dart           # AI buddy character widget
-    confetti_overlay.dart          # Confetti celebration widget
-    quiz_card.dart                 # Individual quiz option card
-    story_card.dart                # Story text display card
+    splash_screen.dart             # Branded loading screen with cycling images
+    story_screen.dart              # Story view + quiz view + animations
 ```
 
 ---
@@ -201,7 +185,7 @@ lib/
 ## 🚀 How to Run
 
 ```bash
-git clone https://github.com/udeme01/peblo_story_buddy
+git clone https://github.com/Udeme01/peblo_story_buddy.git
 cd peblo_story_buddy
 flutter pub get
 flutter run
