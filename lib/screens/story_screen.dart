@@ -72,9 +72,10 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
 
   @override
   Widget build(BuildContext context) {
+    final status = ref.watch(storyProvider.select((s) => s.status));
+    final errorMessage = ref.watch(storyProvider.select((s) => s.errorMessage));
     final appState = ref.watch(storyProvider);
     final notifier = ref.read(storyProvider.notifier);
-    final status = appState.status;
     final isQuiz =
         status == StoryState.quiz ||
         status == StoryState.wrong ||
@@ -82,14 +83,6 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
 
     // Show error snackbar if any
     ref.listen(storyProvider, (previous, next) {
-      if (next.errorMessage != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next.errorMessage!),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
       // Trigger confetti on success
       if (next.status == StoryState.success) {
         _confettiController.play();
@@ -127,7 +120,7 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
         children: [
           isQuiz
               ? _buildQuizView(appState, notifier)
-              : _buildStoryView(status, notifier),
+              : _buildStoryView(status, notifier, errorMessage),
 
           // Confetti overlay
           Align(
@@ -150,16 +143,19 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
     );
   }
 
-  Widget _buildStoryView(StoryState status, StoryNotifier notifier) {
+  Widget _buildStoryView(
+    StoryState status,
+    StoryNotifier notifier,
+    String? errorMessage,
+  ) {
     final isLoading = status == StoryState.loading;
     final isPlaying = status == StoryState.playing;
 
     return Column(
       children: [
-        // TOP — purple gradient with buddy
         Container(
           width: double.infinity,
-          height: MediaQuery.of(context).size.height * 0.42,
+          height: MediaQuery.of(context).size.height * 0.55,
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [Color(0xFF8B5CF6), Color(0xFF6F2BC2)],
@@ -167,11 +163,10 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
               end: Alignment.bottomRight,
             ),
           ),
-          child: Center(
-            child: Text(
-              isPlaying ? '🤖💬' : '🤖',
-              style: const TextStyle(fontSize: 120),
-            ),
+          child: Image.asset(
+            isPlaying ? 'assets/images/image1.jpg' : 'assets/images/image2.jpg',
+            width: double.infinity,
+            fit: BoxFit.cover,
           ),
         ),
 
@@ -234,6 +229,34 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
                   ),
 
                   const SizedBox(height: 32),
+
+                  // ADD THIS before the button SizedBox:
+                  if (errorMessage != null) ...[
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade50,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.red.shade200),
+                      ),
+                      child: Row(
+                        children: [
+                          const Text('😢', style: TextStyle(fontSize: 24)),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Oops! Something went wrong. Tap the button to try again!',
+                              style: TextStyle(
+                                color: Colors.red.shade700,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
 
                   // Button
                   SizedBox(
@@ -307,9 +330,16 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
       ),
       child: Column(
         children: [
-          const SizedBox(height: 100),
-          Text(isSuccess ? '🤖🎉' : '🤖', style: const TextStyle(fontSize: 80)),
-          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            height: MediaQuery.of(context).size.height * 0.4,
+            child: Image.asset(
+              isSuccess
+                  ? 'assets/images/image1.jpg'
+                  : 'assets/images/image9.jpg',
+              fit: BoxFit.cover,
+            ),
+          ),
 
           // White bottom sheet
           Expanded(
@@ -370,7 +400,7 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
                             ),
                           ),
                           child: const Text(
-                            'Play Again 🎮',
+                            'Play Again',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 18,

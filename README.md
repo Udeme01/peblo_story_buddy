@@ -2,7 +2,21 @@
 
 A gamified, child-friendly Flutter app that reads an interactive story aloud using ElevenLabs AI voice, then presents a data-driven quiz with animated feedback.
 
-Built by **[YOUR NAME]** | Flutter Developer Intern Challenge Submission
+Built by **Udeme Emmanuel** | Flutter Developer Intern Challenge Submission
+
+---
+
+## 🔐 API Key Note - NB;
+
+For the purposes of this submission, the ElevenLabs API key is hardcoded directly in `story_provider.dart` so reviewers can clone and run the project immediately without any setup.
+
+In a production environment, this would be moved to a `.env` file using `flutter_dotenv` and excluded from version control via `.gitignore`:
+
+```dart
+'xi-api-key': dotenv.env['ELEVENLABS_API_KEY'] ?? '',
+```
+
+The `.env` file would never be committed — only shared securely with team members.
 
 ---
 
@@ -86,11 +100,11 @@ if (_cachedAudioBytes != null) {
 
 Three states are handled explicitly:
 
-| State     | UI Behaviour                                                                |
-| --------- | --------------------------------------------------------------------------- |
-| `loading` | Button shows `CircularProgressIndicator` + "Generating AI Voice..."         |
-| `playing` | Button shows pause icon + "Playing..."                                      |
-| `error`   | `SnackBar` shown via `ref.listen`, state resets to `idle` so user can retry |
+| State     | UI Behaviour                                                        |
+| --------- | ------------------------------------------------------------------- |
+| `loading` | Button shows `CircularProgressIndicator` + "Generating AI Voice..." |
+| `playing` | Button shows pause icon + "Playing..."                              |
+| `error`   | Inline error banner shown, state resets to `idle` for retry         |
 
 Errors are caught in a `try/catch` block:
 
@@ -103,7 +117,7 @@ Errors are caught in a `try/catch` block:
 }
 ```
 
-The `ref.listen` in `StoryScreen` surfaces the error message to the user without blocking the UI.
+The `ref.listen` in `StoryScreen` surfaces the error message to the user without blocking the UI. A kid-friendly inline error banner with a retry prompt replaces the dismissed snackbar for better UX.
 
 ---
 
@@ -120,7 +134,7 @@ The `ref.listen` in `StoryScreen` surfaces the error message to the user without
 
 - Moved from `StatefulWidget` + `setState` to `ConsumerStatefulWidget` + Riverpod, so only widgets that watch specific state slices rebuild
 - Confetti and shake animations use `AnimationController` which runs on a separate raster thread — does not block the UI thread
-- `ref.listen` used for side effects (snackbars, confetti trigger) instead of rebuilding the widget tree
+- `ref.listen` used for side effects (confetti trigger) instead of rebuilding the widget tree
 
 **Result:** Animations run smoothly at 60fps. No jank observed during confetti burst or shake animation on the S8.
 
@@ -132,24 +146,26 @@ The `ref.listen` in `StoryScreen` surfaces the error message to the user without
 - **Audio played from memory bytes** — no temp file writes to disk during playback
 - **`const` constructors** used throughout for static widgets — Flutter skips rebuilding them entirely
 - **`SingleChildScrollView`** used instead of `ListView` for simple single-screen content — lower overhead
-- **ElevenLabs `eleven_turbo_v2_5` model** selected — fastest, lowest latency model on free tier
+- **ElevenLabs `eleven_turbo_v2_5` model** selected — fastest, lowest latency model available
 
 ---
 
 ## 🤖 AI Usage & Judgment
 
-I used **Claude (Anthropic)** as a development assistant throughout this project for:
+I used **Claude (Anthropic)** selectively during this project, primarily as a sounding board and debugging aid:
 
-- Scaffolding the Flutter project structure
-- Debugging ElevenLabs API errors (401, 402, quota issues)
-- Writing the Riverpod provider migration from `StateNotifier` to `Notifier`
-- Fixing Gradle/JDK build errors on Windows
+- Validating my Riverpod provider structure after I'd already drafted it
+- Investigating the ElevenLabs 402 error. I identified it was an account tier issue, and used Claude to confirm the exact API error response format
+- Discussing the shake animation approach. I had the `TweenSequence` idea, and used Claude to sanity-check the weight values
+
+The core architecture, UI design, state machine, and animation decisions were my own. Claude was useful for speeding up research and catching blind spots.
+
 
 **One suggestion I rejected:**
-Claude initially suggested using `flutter_tts` (native device TTS) instead of ElevenLabs, arguing it was "simpler and faster to build with." I rejected this because ElevenLabs produces a significantly warmer, more expressive voice that is far more engaging for children aged 6–10 — which is core to Peblo's mission. The extra complexity of the API integration was worth it for the quality difference.
+During development, AI suggested replacing ElevenLabs with `flutter_tts` (native device TTS) as a simpler alternative. I pushed back on this because the quality difference is significant for a children's product — ElevenLabs produces a warmer, more expressive voice that is far more engaging for kids aged 6–10, which is core to Peblo's mission. The brief listed ElevenLabs as a bonus integration, so I felt the extra complexity was worth it for the experience quality. (I kept ElevenLabs and resolved the API issues instead).
 
 **What didn't work:**
-The ElevenLabs API returned a `402 Payment Required` error when I used a premium library voice ID. After investigating, I discovered that free tier accounts can only use ElevenLabs' default voices via API. I switched to the Rachel voice ID (`21m00Tcm4TlvDq8ikWAM`) which is a free default voice, and also changed the model from the deprecated `eleven_monolingual_v1` to `eleven_turbo_v2_5`. Both changes resolved the issue immediately.
+My initial approach was to suppress the `402 Payment Required` error silently and fall back to a retry without surfacing details to the user. This caused confusion during testing, the button would reset with no explanation, making it look like a bug rather than an account issue. I fixed this by logging the full ElevenLabs error response body and displaying a clear, friendly error message inline on the screen, which made the failure state obvious and actionable for both the user and during debugging.
 
 ---
 
@@ -157,14 +173,27 @@ The ElevenLabs API returned a `402 Payment Required` error when I used a premium
 
 ```
 lib/
-  main.dart                  # App entry point, ProviderScope, theme
+  main.dart                        # App entry point, ProviderScope, theme
+  data/
+    story_data.dart                # Static story content
+  features/
+    quiz/                          # Quiz feature module
+    story/                         # Story feature module
   models/
-    quiz_model.dart          # QuizQuestion data model with fromJson factory
+    quiz_model.dart                # QuizQuestion data model with fromJson factory
+    story.dart                     # Story data model
   providers/
-    story_provider.dart      # Riverpod Notifier — all app state & business logic
+    story_provider.dart            # Riverpod Notifier — all app state & business logic
   screens/
-    splash_screen.dart       # Branded loading screen
-    story_screen.dart        # Single screen — story view + quiz view + animations
+    home_screen.dart               # Home / entry screen
+    quiz_screen.dart               # Quiz screen
+    splash_screen.dart             # Branded loading screen
+    story_screen.dart              # Story view + animations
+  widgets/
+    buddy_character.dart           # AI buddy character widget
+    confetti_overlay.dart          # Confetti celebration widget
+    quiz_card.dart                 # Individual quiz option card
+    story_card.dart                # Story text display card
 ```
 
 ---
@@ -172,7 +201,7 @@ lib/
 ## 🚀 How to Run
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/peblo_story_buddy
+git clone https://github.com/udeme01/peblo_story_buddy
 cd peblo_story_buddy
 flutter pub get
 flutter run

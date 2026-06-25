@@ -59,7 +59,7 @@ class StoryNotifier extends Notifier<StoryAppState> {
   List<int>? _cachedAudioBytes;
 
   final QuizQuestion quiz = QuizQuestion.fromJson({
-    "question": "What colour was Pip the Robot's lost gear?",
+    "question": "What colour was Pip's gear?",
     "options": ["Red", "Green", "Blue", "Yellow"],
     "answer": "Blue",
   });
@@ -116,17 +116,8 @@ class StoryNotifier extends Notifier<StoryAppState> {
           }),
         );
 
-        // if (response.statusCode != 200) {
-        //   state = state.copyWith(
-        //     status: StoryState.idle,
-        //     errorMessage: 'Audio error ${response.statusCode}. Try again.',
-        //   );
-        //   return;
-        // }
-
         if (response.statusCode != 200) {
-          // Add this line:
-          print('ElevenLabs error body: ${response.body}');
+          // print('ElevenLabs error body: ${response.body}');
 
           state = state.copyWith(
             status: StoryState.idle,
@@ -140,7 +131,6 @@ class StoryNotifier extends Notifier<StoryAppState> {
       }
 
       await _audioPlayer.play(BytesSource(Uint8List.fromList(audioBytes)));
-      ;
     } catch (e) {
       state = state.copyWith(
         status: StoryState.idle,
